@@ -1,31 +1,46 @@
 #include<stdio.h>
 
+void wc(FILE *fp);
+
 int main(int argc, char *argv[]) {
 
-	if (argc < 3) {
-		printf("Too many or too little arguments given.\n");
-		return 0;
-	}
-	char *filename = argv[1];
-
-	FILE *fp = fopen(filename, "r");
-	if (fp == NULL) {
-		printf("Could not open file for reading");
+	if (argc > 2) {
+		printf("Too many arguments given!\n");
 		return 0;
 	}
 
+	FILE *fp = stdin;
+	if (argc == 2) {
+		fp = fopen(argv[1], "r");
+		if (fp == NULL) {
+			printf("Could not open file for reading\n");
+			return 0;
+		}
+	}
+	
+	wc(fp);
+	
+	if (fp != stdin) {
+		fclose(fp);
+	}
+	
+	return 0;
+}
+
+void wc(FILE *fp) {
 	int ch = fgetc(fp);
 	int charCount = 0;
 	int wordCount = 0;
-	int wsCheck = 0;
+	int wsCheck = 1;
 	int lineCount = 0;
 
 	while (ch != EOF) {
 		charCount++;
 
-		if ((ch == ' ' || ch == '\t' || ch == '\n') && wsCheck == 0) {
+		int isSpace = (ch == ' ' || ch == '\t' || ch == '\n');
+		if (isSpace && wsCheck == 0) {
 			wsCheck = 1;
-		} else if (ch != ' ' && ch != '\t' && ch != '\n' && wsCheck == 1) {
+		} else if (!isSpace && wsCheck == 1) {
 			wsCheck = 0;
 			wordCount++;
 		}
@@ -37,9 +52,5 @@ int main(int argc, char *argv[]) {
 		ch = fgetc(fp);
 	}
 
-	fclose(fp);
-
-	printf("%d\t%d\t\%d\t%s\n", charCount, wordCount, lineCount, filename);
-
-	return 0;
+	printf("%d %d %d\n", lineCount, wordCount, charCount);
 }
